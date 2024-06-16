@@ -1,0 +1,11 @@
+#BSUB -n 8
+#BSUB -R "rusage[mem=64G] span[hosts=1] select[mem < 500GB] order[-slots]"
+#BSUB -q rvmartin
+#BSUB -a 'docker(gcr.io/ris-registry-shared/matlab)'
+#BSUB -N
+#BSUB -u haihuizhu@wustl.edu
+#BSUB -o job-matlab-%J.txt
+#BSUB -J "Matlab-1"
+
+cd ~/SPARTAN-shared/Public_Data/Scripts
+matlab -nodisplay -r "Z_Reanalysis_T_P_at_SPARTAN; exit"
