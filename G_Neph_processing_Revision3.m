@@ -51,15 +51,15 @@ addpath('UtilityFunctions')
 debug_mode = 0;
 direc = find_root_dir(debug_mode);
 
-direc_output = sprintf('%s/Public_Data/Neph_Processed',rootdir);
-direc_outputCR = sprintf('%s/Public_Data/Neph_Processed/CR_data',rootdir);
+direc_output = sprintf('%s/Public_Data/Neph_Processed',direc);
+direc_outputCR = sprintf('%s/Public_Data/Neph_Processed/CR_data',direc);
 TrackerFileName = sprintf('%s/File_condition_tracker.xlsx', direc_output);
 
 % if or not reprocess all the data
 Reprocess = 1; % should always be 0 unless you are 100% sure you want to reprocess - it takes a long time (~5 min/site)
 
 % The diary function saves the processing history into an annual record
-diary(sprintf('%s/Public_Data/Data_Processing_Records/%s_Neph_Record', rootdir, datestr(today, 'yyyy-mm')))
+diary(sprintf('%s/Public_Data/Data_Processing_Records/%s_Neph_Record', direc, datestr(today, 'yyyy-mm')))
 fprintf('%s \n', datestr(today))
 
 %%%%%%%%%%%%%%%%%%
@@ -70,7 +70,7 @@ Scatmax=2500; % upper linear range of green (532nm) scatter. Signal non-linear a
 RHmin=0;   % lower limit of RH
 %%%%%%%%%%%%%%%%%%
 
-site_details = readtable(sprintf('%s/Site_Sampling/Site_details.xlsx',rootdir),'PreserveVariableNames',true);
+site_details = readtable(sprintf('%s/Site_Sampling/Site_details.xlsx',direc),'PreserveVariableNames',true);
 Site_codes = table2array(site_details(:,1));
 Site_cities = table2array(site_details(:,3));
 
@@ -88,10 +88,10 @@ cr_title = {'RF_CR', 'GF_CR', 'BF_CR', 'RB_CR', 'GB_CR', 'BB_CR' };
 
 for loc =  1:length(Site_codes)
 
-    raw_dir = sprintf ('%s/Site_Sampling/%s_%s/Nephelometer_Data/Raw',rootdir,Site_codes{loc},Site_cities{loc});
-    archive_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Archived', rootdir, Site_codes{loc}, Site_cities{loc});
-    fig_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Plots_Data_Checking', rootdir, Site_codes{loc}, Site_cities{loc});
-    reject_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Rejected', rootdir, Site_codes{loc}, Site_cities{loc});
+    raw_dir = sprintf ('%s/Site_Sampling/%s_%s/Nephelometer_Data/Raw',direc,Site_codes{loc},Site_cities{loc});
+    archive_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Archived', direc, Site_codes{loc}, Site_cities{loc});
+    fig_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Plots_Data_Checking', direc, Site_codes{loc}, Site_cities{loc});
+    reject_dir = sprintf('%s/Site_Sampling/%s_%s/Nephelometer_Data/Rejected', direc, Site_codes{loc}, Site_cities{loc});
 
     if Reprocess == 1 
         arclist = movetoraw(archive_dir, raw_dir);
