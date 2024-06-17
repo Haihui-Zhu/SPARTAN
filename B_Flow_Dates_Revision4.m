@@ -37,7 +37,7 @@
 % --2019-05-21, Crystal Weagle, added ability to determine method index and
 % reference to Site_details.xlsx spreadsheet
 
-close all; clear all; clc
+close all; clear ; clc
 addpath('UtilityFunctions')
 
 %%  %%%%%%%%%%%%%%%%%%%%%%%%%%% USER INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%

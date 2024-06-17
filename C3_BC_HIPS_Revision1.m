@@ -12,7 +12,7 @@ addpath('UtilityFunctions')
 debug_mode = 0;
 direc = find_root_dir(debug_mode);
 
-Redo_All_Archieve = 1; % set to 1 if want to re-process all archived data
+Redo_All_Archieve = 0; % set to 1 if want to re-process all archived data
 
 direc_master = strcat(direc,'/Analysis_Data/Master_files');
 direc_HIPS = strcat(direc,'/Analysis_Data/HIPS/Reports'); 
