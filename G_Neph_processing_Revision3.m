@@ -56,7 +56,7 @@ direc_outputCR = sprintf('%s/Public_Data/Neph_Processed/CR_data',direc);
 TrackerFileName = sprintf('%s/File_condition_tracker.xlsx', direc_output);
 
 % if or not reprocess all the data
-Reprocess = 1; % should always be 0 unless you are 100% sure you want to reprocess - it takes a long time (~5 min/site)
+Reprocess = 0; % should always be 0 unless you are 100% sure you want to reprocess - it takes a long time (~5 min/site)
 
 % The diary function saves the processing history into an annual record
 diary(sprintf('%s/Public_Data/Data_Processing_Records/%s_Neph_Record', direc, datestr(today, 'yyyy-mm')))
