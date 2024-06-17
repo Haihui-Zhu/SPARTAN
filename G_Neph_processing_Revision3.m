@@ -96,7 +96,7 @@ for loc =  1:length(Site_codes)
     if Reprocess == 1 
         arclist = movetoraw(archive_dir, raw_dir);
         rejlist = movetoraw(reject_dir, raw_dir);
-        fprintf('Moved archived and rejected raw data to raw for reprocessing\n')
+        fprintf('\n%s: Moved archived and rejected raw data to raw for reprocessing\n',Site_codes{loc})
 
         names = dir(sprintf('%s/*', fig_dir));
         files = {names.name}; clear names

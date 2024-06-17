@@ -20,15 +20,15 @@ debug_mode = 0;
 direc = find_root_dir(debug_mode);
 
 % the diary function saves the processing history into an annual record
-diary  (sprintf('%s/Public_Data/Data_Processing_Records/%s_TimeResolvedPM25_Record',rootdir,datestr(today,'yyyy-mm')))
+diary  (sprintf('%s/Public_Data/Data_Processing_Records/%s_TimeResolvedPM25_Record',direc,datestr(today,'yyyy-mm')))
 fprintf('%s \n', datestr(today))
 
 %% %%%%%%% USER SWITCHES %%%%%%%%%%
-direc_PM25_in = sprintf('%s/Public_Data/Time-resolved_PM2.5/Input_data',rootdir); 
-direc_Neph = sprintf('%s/Public_Data/Neph_Processed',rootdir); 
+direc_PM25_in = sprintf('%s/Public_Data/Time-resolved_PM2.5/Input_data',direc); 
+direc_Neph = sprintf('%s/Public_Data/Neph_Processed',direc); 
 
-direc_PM25_out = sprintf('%s/Public_Data/Time-resolved_PM2.5/Data_sharing',rootdir); 
-direc_plot_out = sprintf('%s/Public_Data/Time-resolved_PM2.5/Plots',rootdir); 
+direc_PM25_out = sprintf('%s/Public_Data/Time-resolved_PM2.5/Data_sharing',direc); 
+direc_plot_out = sprintf('%s/Public_Data/Time-resolved_PM2.5/Plots',direc); 
 
 max_RH = 80;
 deriv_screen = 1;
@@ -47,7 +47,7 @@ data_version = 'Data version 1.1';
 % 8 = Sampling Mode (SPARTAN or MAIA)
 
 %site_details = readtable('/data1/spartan/Site_Sampling/Site_details.xlsx');
-site_details = readtable(sprintf('%s/Site_Sampling/Site_details.xlsx',rootdir));
+site_details = readtable(sprintf('%s/Site_Sampling/Site_details.xlsx',direc));
 Site_codes = table2array(site_details(:,1));
 Site_cities = table2array(site_details(:,3));
 Site_countries = table2array(site_details(:,2));
@@ -56,7 +56,7 @@ longitudes = table2array(site_details(:,6));
 elevations = table2array(site_details(:,7));  
 
 %PM25_parameters = readtable('/data1/spartan/Public_Data/Chemical_Filter_Data/Sampling_Parameters_Methods.xlsx','Sheet','PM2.5 mass');
-PM25_parameters = readtable(sprintf('%s/SOPs/Public SOPs/Sampling_Parameters_Methods_2.3.xlsx',rootdir),'Sheet','PM2.5 mass');
+PM25_parameters = readtable(sprintf('%s/SOPs/Public SOPs/Sampling_Parameters_Methods_2.3.xlsx',direc),'Sheet','PM2.5 mass');
 
 %% --------- Find and read data files from file directory ---------
 for loc =  1:length(Site_codes)
