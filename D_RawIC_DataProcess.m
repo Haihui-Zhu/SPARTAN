@@ -132,9 +132,14 @@ if Redo_All_Archieve == 1
         ardir = strcat(direc_archive,Site_codes{loc});
         files = getFiles(ardir);
 
+        % new file 
+        new_files = getFiles(direc_new);
+
         for fid = 1:length(files)
             tfile = strcat(ardir,'/',files{fid,1});
-            if contains(SkipList,files{fid,1}) % skip those in SkipList
+            if any(contains(SkipList,files{fid,1})) % skip those in SkipList
+                continue
+            elseif any(contains(new_files,files{fid,1})) % skip copy one file multiple times - might make the script faster
                 continue
             else
                 [SUCCESS,MESSAGE,MESSAGEID] = copyfile(tfile, direc_new);

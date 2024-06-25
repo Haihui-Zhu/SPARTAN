@@ -3,7 +3,7 @@ function find_ic_zeros(data_samples, Master_IDs, ic_zero_fname, data_type)
 
 if data_type == 1
     species = {'Fluoride','Chloride','Nitrite','Bromide','Nitrate','Phosphate','Sulfate'};
-elseif date_type == 2
+elseif data_type == 2
     species = {'Lithium','Sodium','Ammonium','Potassium','Magnesium','Calcium'}; 
 else
     error('Date type not regonized. Use 1 for anion, 2 for cation.\n')
