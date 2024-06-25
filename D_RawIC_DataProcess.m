@@ -82,6 +82,8 @@ mdl_ref_title = mdl_ref.Properties.VariableNames;
 mdl_ref_dates = mdl_ref.Start_date;
 mdl_ref = table2array(mdl_ref(:,2:end));
 
+% file name to print filter info when IC value is 0 or nan
+ic_zero_fname = 'IC_zero.txt';
 
 %%  %%%%%%%%%%%%%%%%%%%%%%%%%%%% CONSTANTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global variables
@@ -110,6 +112,7 @@ cations_MDL = [0.0007 0.002 0.003 0.005 0.004 0.006]; % ug/mL
 
 %% %%%%%%%%%%%% Find files in either "NEW" dir or 'Archived' %%%%%%%%%%%%%%
 if Redo_All_Archieve == 1
+
     % read the list of files that do not need to reprocess:
     fname = strcat(direc_archive,'No_need_to_reprocess.txt');
     fileID = fopen(fname, 'r');
@@ -131,7 +134,7 @@ if Redo_All_Archieve == 1
 
         for fid = 1:length(files)
             tfile = strcat(ardir,'/',files{fid,1});
-            if contains(SkipList,files{fid,1})
+            if contains(SkipList,files{fid,1}) % skip those in SkipList
                 continue
             else
                 [SUCCESS,MESSAGE,MESSAGEID] = copyfile(tfile, direc_new);
@@ -169,14 +172,22 @@ if Redo_All_Archieve == 1
     end
     fprintf('\nDone copying archived IC raw file to NEW.\n\n')
 
-    % now read files in the raw file directory
-    files = getFiles(direc_new); 
-else
-    % files in the raw file directory should be striaght from the IC system, unmodified
-    % this will read all files in the raw directory
-    files = getFiles(direc_new); 
-end
+    % creat a new IC_zero file
+    delete(ic_zero_fname)
+    fileID = fopen(ic_zero_fname, 'w');
+    if fileID == -1
+        error('File could not be opened for appending');
+    end
+    fprintf(fileID, 'Filter ID    Species   Value  \n');
+    fclose(fileID);
 
+
+end 
+
+% now read files in the raw file directory
+files = getFiles(direc_new);
+
+ 
 %% %%%%%%%%%%%% Processing each file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for IC_file = 1:length(files)
     
@@ -213,7 +224,6 @@ for IC_file = 1:length(files)
         if fileID == -1
             error('File could not be opened for appending');
         end
-        SkipList = {};
         fprintf(fileID, '%s\n',files{IC_file,1});
         fclose(fileID);
         
@@ -540,9 +550,12 @@ for IC_file = 1:length(files)
                 masterID_sample_ind = [];
                 for k = 1:length(samples_ICfile_ind)
                     if ~isempty( find(matches(Master_IDs, labels_samples(samples_ICfile_ind(k))),1) ) 
+                        % filter ID found in Master_IDs
                         masterID_sample_ind(k) = find(matches(Master_IDs, labels_samples(samples_ICfile_ind(k)))); % finds the row index in the master file for samples in IC file
                         samples_IC_Master(k) = samples_ICfile_ind(k);
                     else
+                        % filter ID not found: could be filter ID format
+                        % mismatch, try fix it
                         tfilterid = char(labels_samples(samples_ICfile_ind(k))) ;
                         if length(tfilterid) == 8
                             tfilterid2 = strcat(tfilterid(1:5),'0',tfilterid(6:8));
@@ -567,6 +580,9 @@ for IC_file = 1:length(files)
                     
                     % adding IC data to Master_IC
                     Master_IC(masterID_sample_ind,1:7) = data_samples(samples_IC_Master,:).*extraction_volumes;
+
+                    % find any zeros and print to 'IC_zero.txt'
+                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ic_zero_fname, data_type)
 
                     % adding area to area file
                     for ii = 1:7
@@ -912,6 +928,9 @@ for IC_file = 1:length(files)
                     
                     % adding IC data to Master_IC
                     Master_IC(masterID_sample_ind, 8:13) = data_samples(samples_IC_Master,:).*extraction_volumes;
+        
+                    % find any zeros and print to 'IC_zero.txt'
+                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ic_zero_fname, data_type)
 
                     % adding area to area file
                     for ii = 1:6
