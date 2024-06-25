@@ -106,6 +106,15 @@ for loc =  1:length(Site_codes)
         filename = files(i);
         if contains(files(i),'TSP') || contains(files(i),'PM25')
             Neph_dataC = csvread(sprintf('%s/%s/%s',direc_Neph,Site_codes{loc},char(filename)),2,0);
+            
+            % Some Neph data might have weired date (ILNZ TSP data), remove
+            % those before proceeding
+            removeind = find(Neph_dataC(:,1)>2100);
+            if ~isempty(removeind)
+                fprintf('Removing strange date (e.g. year = %d) in %s\n', Neph_dataC(removeind(1),1), files(i))
+                Neph_dataC(removeind) = [];
+            end
+
             Neph_dataB = [Neph_dataB; Neph_dataC];
             clear Neph_dataC
         end
