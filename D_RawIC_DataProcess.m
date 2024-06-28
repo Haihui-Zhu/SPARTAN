@@ -183,7 +183,7 @@ if Redo_All_Archieve == 1
     if fileID == -1
         error('File could not be opened for appending');
     end
-    fprintf(fileID, 'Filter ID    Species   Value  \n');
+    fprintf(fileID, 'Filter ID    date     Species   Value  \n');
     fclose(fileID);
 
 
@@ -581,13 +581,20 @@ for IC_file = 1:length(files)
                     elog_index = find(contains(Sheets_elog,site_IDs(i,:)) == 1);
                     Elog_SheetName = char(Sheets_elog(elog_index));
                     cell_elog=readcell(Elog_filename,'Sheet',Elog_SheetName);
-                    extraction_volumes = GetVolume(cell_elog,Master_IDs,masterID_sample_ind);
+                    [extraction_volumes,extraction_dates] = GetVolume(cell_elog,Master_IDs,masterID_sample_ind);
                     
+                    % find any zeros and print to 'IC_zero.txt'
+                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ...
+                        extraction_dates, Master_masstype(masterID_sample_ind), ic_zero_fname, data_type)
+                    % nan out -xxxxx before writing to master files
+                    temp = data_samples(samples_IC_Master,:);
+                    temp(temp<-100) = nan;
+                    data_samples(samples_IC_Master,:) = temp;
+
+
                     % adding IC data to Master_IC
                     Master_IC(masterID_sample_ind,1:7) = data_samples(samples_IC_Master,:).*extraction_volumes;
 
-                    % find any zeros and print to 'IC_zero.txt'
-                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ic_zero_fname, data_type)
 
                     % adding area to area file
                     for ii = 1:7
@@ -929,14 +936,19 @@ for IC_file = 1:length(files)
                     elog_index = find(contains(Sheets_elog,site_IDs(i,:)) == 1);
                     Elog_SheetName = char(Sheets_elog(elog_index));
                     cell_elog=readcell(Elog_filename,'Sheet',Elog_SheetName);
-                    extraction_volumes = GetVolume(cell_elog,Master_IDs,masterID_sample_ind);
+                    [extraction_volumes, extraction_dates] = GetVolume(cell_elog,Master_IDs,masterID_sample_ind);
                     
+                    % find any zeros and print to 'IC_zero.txt'
+                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ...
+                        extraction_dates, Master_masstype(masterID_sample_ind), ic_zero_fname, data_type)
+                    % nan out -xxxxx before writing to master files
+                    temp = data_samples(samples_IC_Master,:);
+                    temp(temp<-100) = nan;
+                    data_samples(samples_IC_Master,:) = temp;
+
                     % adding IC data to Master_IC
                     Master_IC(masterID_sample_ind, 8:13) = data_samples(samples_IC_Master,:).*extraction_volumes;
         
-                    % find any zeros and print to 'IC_zero.txt'
-                    find_ic_zeros(data_samples(samples_IC_Master,:), Master_IDs(masterID_sample_ind), ic_zero_fname, data_type)
-
                     % adding area to area file
                     for ii = 1:6
                         if size(area_table(masterID_sample_ind,5+7+ii)) == size(area_samples(samples_IC_Master,ii))
@@ -1037,12 +1049,15 @@ function data_post= getpostdata(data_pre,raw_cal, CubicIndicator, data_all,IC_lo
     
 if isempty(raw_cal)
    data_post = NaN.*data_pre;
+   data_post(isnan(data_post)) = -77777; % no calibration curve
+
 else
     if contains(raw_cal{3},'Lin') % linear regression
         offset = str2double(raw_cal{5});
         slope = str2double(raw_cal{6});
         data_post =  (data_pre-offset)./slope;
-       
+
+        data_post(isnan(data_post)) = -88888; % no signal
 
     elseif contains(raw_cal{3},'Cubic')
     
@@ -1073,17 +1088,18 @@ else
                         if ~isempty(a) 
                             data_post(i,1) =  double( vpasolve(eqn,x,[0 31]) ); % these coefficients valid up to 31 mg/L
                         else % there is not solution (unlikely to reach this point)
-                            data_post(i,1) =  NaN;
+                            data_post(i,1) =  -99999; % no solution to the signal
                         end
 
                     end
                 else
-                    data_post(i,1) = NaN;
+                    data_post(i,1) = -88888; % no signal
                 end
             end
          
         else 
             data_post =  data_all;
+            data_post(isnan(data_post)) = -66666; % cubic curve, no enough coefficient
         end
         
     end
@@ -1094,7 +1110,7 @@ else
 
     % *********** Haihui Zhu, Oct 2023 ************************************
     % For very low concentration (e.g. field blank), apply the low concentration calibration curves
-    ind = find(data_post<0.39 & ~isnan(data_post));
+    ind = find(data_post<0.39 & data_post > -100);
     if ~isempty(ind)
         % NOTE: using interp1, instead of curve fitting, to estimate ion
         % concentration
@@ -1136,8 +1152,8 @@ else
         end
     end
     % *********************************************************************
-
 end
+
 end
 
 function [data_pre,labels_all,data_all,data_type]= ReadRawIC(filename,SheetName,file)
@@ -1348,7 +1364,7 @@ end
 
 end
 
-function extraction_volumes = GetVolume(cell_elog,Master_IDs,masterID_sample_ind)
+function [extraction_volumes, extraction_dates] = GetVolume(cell_elog,Master_IDs,masterID_sample_ind)
 elog_ID = cell_elog(:,3);
 for i = 1:length(elog_ID)
    if ismissing( elog_ID{i} )
@@ -1379,9 +1395,10 @@ for ii = 1:length(masterID_sample_ind)
 end
 
 
-% selected volumn and IDs
+% selected volumn, IDs, and dates
 volumes = cell_elog(Ind,6) ;
 IDs = cell_elog(Ind,3);
+dates = cell_elog(Ind,5);
 N = 0;
 for i = 1:length(volumes)
     if ~isa(volumes{i},'double')
@@ -1394,6 +1411,9 @@ if N>0
     error('Check E-log for invalid volume.\n')
 else
     extraction_volumes = cell2mat( volumes );
+    extraction_dates   = dates ;
 end
 
 end
+
+
