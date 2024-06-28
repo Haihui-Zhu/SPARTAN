@@ -10,15 +10,6 @@
 % Written by: Haihui Zhu, based on version 2 by Crystal Weagle, Emme Le
 % Roy, and Chris Oxford
 % Created: 12 May 2020
-
-% EDITS (yyyy-mm-dd, author name): 
-% 2023-04-22, Haihui Zhu
-% Fixing barcode reading error: the previous version round up barcode
-% instead of reading the actual number. More specifically:
-% 1.Retired xlsread. Use readtable instead. xlsread doesn't introduce error 
-%   but requires multiple reading outputs and is no longer recommended for
-%   the latest version of MatLab.  
-% 2.Save output data using writetable function 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all; clear ; clc
